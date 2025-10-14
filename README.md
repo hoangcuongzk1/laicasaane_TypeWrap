@@ -25,7 +25,7 @@ This library utilizes Roslyn Source Generator to generate type wrappers for any 
 
     ![add package by git url](imgs/add-package-by-git-url-1.png)
 
-3. Enter the package URL `https://github.com/laicasaane/TypeWrap.git?path=/Packages/com.laicasaane.typewrap#1.1.1`.
+3. Enter the package URL `https://github.com/laicasaane/TypeWrap.git?path=/Packages/com.laicasaane.typewrap#1.2.2`.
 
 ![enter git url then press add button](imgs/add-package-by-git-url-2.png)
 
