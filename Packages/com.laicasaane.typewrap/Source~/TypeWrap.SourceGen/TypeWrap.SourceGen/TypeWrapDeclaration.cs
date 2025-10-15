@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Newtonsoft.Json.Utilities;
 using SourceGen.Common;
 
 namespace TypeWrap.SourceGen
@@ -34,7 +33,11 @@ namespace TypeWrap.SourceGen
 
         public string FieldTypeName { get; }
 
+        public string FieldEnumUnderlyingTypeName { get; }
+
         public bool IsFieldDeclared { get; }
+
+        public bool IsFieldEnum { get; }
 
         public bool IsReadOnly { get; }
 
@@ -107,6 +110,8 @@ namespace TypeWrap.SourceGen
             FieldTypeSymbol = fieldTypeSymbol;
             FieldTypeName = fieldTypeSymbol.ToFullName();
             ExcludeConverter = excludeConverter;
+            IsFieldEnum = fieldTypeSymbol.IsEnumType();
+            FieldEnumUnderlyingTypeName = IsFieldEnum ? fieldTypeSymbol.EnumUnderlyingType.ToFullName() : string.Empty;
 
             var members = symbol.GetMembers();
             var definedMembers = new HashSet<string>(StringComparer.Ordinal);
@@ -499,7 +504,9 @@ namespace TypeWrap.SourceGen
 
         private static InterfaceKind GetBuiltInInterfaces(INamedTypeSymbol type)
         {
-            switch (type.SpecialType)
+            var specialType = type.IsEnumType() ? SpecialType.System_Enum : type.SpecialType;
+
+            switch (specialType)
             {
                 case SpecialType.System_Enum:
                 case SpecialType.System_Char:
@@ -531,7 +538,9 @@ namespace TypeWrap.SourceGen
 
         private static OperatorKind GetBuiltInOperators(INamedTypeSymbol type)
         {
-            switch (type.SpecialType)
+            var specialType = type.IsEnumType() ? SpecialType.System_Enum : type.SpecialType;
+
+            switch (specialType)
             {
                 case SpecialType.System_Enum:
                     return OperatorKind.OnesComplement
@@ -542,8 +551,6 @@ namespace TypeWrap.SourceGen
                         | OperatorKind.BitwiseAnd
                         | OperatorKind.BitwiseOr
                         | OperatorKind.BitwiseXor
-                        | OperatorKind.LeftShift
-                        | OperatorKind.RightShift
                         | OperatorKind.Equal
                         | OperatorKind.NotEqual
                         | OperatorKind.Greater
