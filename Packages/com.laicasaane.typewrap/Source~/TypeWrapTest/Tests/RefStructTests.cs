@@ -3,7 +3,7 @@ using TypeWrap;
 
 namespace TypeWrapTest
 {
-    [WrapType(typeof(Span<int>), "Values")]
+    [WrapType(typeof(Span<int>), nameof(Values))]
     public readonly ref partial struct MySpanInt
     {
         public readonly Span<int> Values;
