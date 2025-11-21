@@ -1,15 +1,24 @@
-﻿using System.Threading;
+﻿using System;
 using Microsoft.CodeAnalysis;
+using SourceGen.Common;
 
 namespace TypeWrap.SourceGen
 {
-    public struct CompilationCandidate
+    public struct CompilationCandidate : IEquatable<CompilationCandidate>
     {
-        public Compilation compilation;
+        public string assemblyName;
         public References references;
         public bool enableNullable;
+        public bool isValid;
 
-        public static CompilationCandidate GetCompilation(Compilation compilation, CancellationToken token)
+        /// <summary>
+        /// Do not store <paramref name="compilation"/>.
+        /// </summary>
+        public static CompilationCandidate GetCompilation(
+              Compilation compilation
+            , string generatorNamespace
+            , string skipAttribute
+        )
         {
             var references = new References();
 
@@ -35,11 +44,24 @@ namespace TypeWrap.SourceGen
             }
 
             return new CompilationCandidate {
-                compilation = compilation,
+                assemblyName = compilation.Assembly.Name,
                 references = references,
                 enableNullable = compilation.Options.NullableContextOptions != NullableContextOptions.Disable,
+                isValid = compilation.IsValidCompilation(generatorNamespace, skipAttribute),
             };
         }
+
+        public readonly override bool Equals(object obj)
+            => obj is CompilationCandidate other && Equals(other);
+
+        public readonly bool Equals(CompilationCandidate other)
+            => string.Equals(assemblyName, other.assemblyName, StringComparison.Ordinal)
+            && references.Equals(other.references)
+            && enableNullable == other.enableNullable
+            ;
+
+        public readonly override int GetHashCode()
+            => HashValue.Combine(assemblyName, references, enableNullable);
     }
 
     public struct References
